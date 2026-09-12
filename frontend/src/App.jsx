@@ -5,13 +5,19 @@ function App() {
   const [items, setItems] = useState([]);
   const [title, setTitle] = useState('');
   const [type, setType] = useState('movie');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [filter]);
 
   const fetchItems = () => {
-    axios.get('http://localhost:5000/api/items')
+    const url =
+      filter === 'all'
+        ? 'http://localhost:5000/api/items'
+        : `http://localhost:5000/api/items?status=${filter}`;
+
+    axios.get(url)
       .then((res) => setItems(res.data))
       .catch((err) => console.error('Error fetching items:', err));
   };
@@ -73,47 +79,78 @@ function App() {
         </button>
       </form>
 
+      <div className="">
+        {['all', 'want-to-watch', 'watched'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-1.5 rounded-full text-sm capitalize transition ${filter === f
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              }`}
+          >
+            {f.replace('-', '')}
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-4">
         {items.map((item) => (
-          <div key={item._id} className="bg-gray-800 p-4 rounded-lg shadow relative">
-            <button
-              onClick={() => handleDelete(item._id)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
-              title="Delete"
-            >
-              ✕
-            </button>
+          <div key={item._id} className="bg-gray-800 p-4 rounded-lg shadow relative flex gap-4">
+            {item.poster && (
+              <img
+                src={item.poster}
+                alt={item.title}
+                className="w-20 h-28 object-cover rounded"
+              />
+            )}
 
-            <h2 className="text-xl font-semibold pr-6">{item.title}</h2>
-            <p className="text-sm text-gray-400 capitalize">{item.type} — {item.status}</p>
-
-            {item.status === 'want-to-watch' && (
+            <div className="flex-1">
               <button
-                onClick={() => handleMarkWatched(item._id)}
-                className="mt-2 text-sm bg-green-600 hover:bg-green-700 px-3 py-1 rounded transition"
+                onClick={() => handleDelete(item._id)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
+                title="Delete"
               >
-                Mark as Watched
+                ✕
               </button>
-            )}
 
-            {item.status === 'watched' && (
-              <div className="mt-2 flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRate(item._id, star)}
-                    className={`text-2xl ${
-                      item.rating >= star ? 'text-yellow-400' : 'text-gray-600'
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-            )}
+              <h2 className="text-xl font-semibold pr-6">{item.title}</h2>
+              <p className="text-sm text-gray-400 capitalize">
+                {item.type} — {item.status} {item.year && `(${item.year})`}
+              </p>
+
+              {item.plot && (
+                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.plot}</p>
+              )}
+
+              {item.status === 'want-to-watch' && (
+                <button
+                  onClick={() => handleMarkWatched(item._id)}
+                  className="mt-2 text-sm bg-green-600 hover:bg-green-700 px-3 py-1 rounded transition"
+                >
+                  Mark as Watched
+                </button>
+              )}
+
+              {item.status === 'watched' && (
+                <div className="mt-2 flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleRate(item._id, star)}
+                      className={`text-2xl ${item.rating >= star ? 'text-yellow-400' : 'text-gray-600'
+                        }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
+
     </div>
   );
 }

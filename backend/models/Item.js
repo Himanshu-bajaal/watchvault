@@ -19,7 +19,7 @@ const itemSchema = new mongoose.Schema(
         },
         rating: {
             type: Number,
-            min: 0,
+            min: 1,
             max: 5,
             default:null,
         },
@@ -27,7 +27,20 @@ const itemSchema = new mongoose.Schema(
             type: String,
             default: '',
         },
-    },
+        poster:{
+                type: String,
+                default: '',
+        },
+        year:{
+            type: String,
+            default: '',
+        },
+        plot:{
+            type: String,
+            default: '',
+        },
+            },
+        
     { timestamps: true,}
 );
 
