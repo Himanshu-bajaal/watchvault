@@ -31,7 +31,13 @@ router.post('/',protect, async (req, res) => {
                 console.error('Error fetching data from OMDB:', err);
             }
         }
-        const newItem = await Item.create({ title, type, ...extraData });
+        const newItem = await Item.create({
+             title,
+             type,
+             user :req.userId,
+             ...extraData
+             });
+
         res.status(201).json(newItem);
     }   catch (err) {
         res.status(400).json({ message: err.message });
@@ -40,13 +46,16 @@ router.post('/',protect, async (req, res) => {
 
 router.put('/:id',protect, async (req, res) => {
     try {
+        const item = await Item.findOne({ _id: req.params.id, user: req.userId });
+        if (!item) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+
         const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
         });
-        if (!updatedItem) {
-            return res.status(404).json({ message: "Item not found" });
-        }
+
         res.json(updatedItem);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -55,10 +64,11 @@ router.put('/:id',protect, async (req, res) => {
 
 router.delete('/:id',protect, async (req, res) => {
     try {
-        const deletedItem = await Item.findByIdAndDelete(req.params.id);
-        if (!deletedItem) {
-            return res.status(404).json({ message: "Item not found" });
+        const item = await Item.findOne({_id: req.params.id, user:req.userId});
+        if(!item){
+            return res.status(404).json({message: "Item not found"});
         }
+       await Item.findByIdAndDelete(req.params.id);
         res.json({ message: "Item deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -69,7 +79,7 @@ router.delete('/:id',protect, async (req, res) => {
 router.get('/',protect, async (req, res) => {
     try {
         const { status } = req.query;
-        const filter = status ? { status } : {};
+        const filter = status ? { status, user: req.userId } : { user: req.userId };
         const items = await Item.find(filter).sort({ createdAt: -1 });
         res.json(items);
     } catch (error) {
