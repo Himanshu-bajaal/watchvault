@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Item = require("../models/Item");
 const axios = require("axios");
+const protect = require("../middlewares/auth.middleware");
 
-router.post('/', async (req, res) => {
+router.post('/',protect, async (req, res) => {
     try {
         const { title, type } = req.body;
         let extraData = {};
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',protect, async (req, res) => {
     try {
         const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -52,7 +53,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',protect, async (req, res) => {
     try {
         const deletedItem = await Item.findByIdAndDelete(req.params.id);
         if (!deletedItem) {
@@ -65,7 +66,7 @@ router.delete('/:id', async (req, res) => {
 
 });
 
-router.get('/', async (req, res) => {
+router.get('/',protect, async (req, res) => {
     try {
         const { status } = req.query;
         const filter = status ? { status } : {};
