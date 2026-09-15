@@ -66,6 +66,35 @@ router.post('/login', async (req, res) => {
   catch (error) {
     res.status(400).json({ message: error.message });
   }
+
+  router.get('/me', async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const User = require('../models/User');
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+  } catch (error) {
+    res.status(401).json({ message: 'Not authenticated' });
+  }
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
+});
+
 });
 
 module.exports = router;
