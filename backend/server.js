@@ -5,18 +5,17 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth.routes")
 const cookieParser = require("cookie-parser");
 
-
-dotenv.config();
+dotenv.config(); // loads .env values into process.env — must run before anything below uses them
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
     origin:'http://localhost:5173',
-    credentials:true,
+    credentials:true, // allows the auth cookie to be sent/received across ports (frontend <-> backend)
 }));
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser()); // makes req.cookies available — needed to read the JWT cookie in auth middleware
 app.use("/api/auth", authRoutes);
 
 mongoose.connect(process.env.MONGO_URI)

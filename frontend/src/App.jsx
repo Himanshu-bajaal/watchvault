@@ -10,14 +10,16 @@ function App() {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('movie');
   const [filter, setFilter] = useState('all');
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true); // true until we know for sure if a session cookie is valid
 
+  // re-fetches items whenever the user logs in/out, or the filter changes
   useEffect(() => {
     if (user) {
       fetchItems();
     }
   }, [user, filter]);
 
+  // runs once on app load — checks for an existing valid login cookie so refreshing doesn't log the user out
   useEffect(() => {
     checkAuth();
   }, []);
@@ -29,7 +31,7 @@ function App() {
     } catch (err) {
       setUser(null);
     } finally {
-      setCheckingAuth(false);
+      setCheckingAuth(false); // runs whether the check succeeded or failed
     }
   };
 
@@ -69,11 +71,12 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await api.post('/auth/logout');
+    await api.post('/auth/logout'); // clears the httpOnly cookie server-side — frontend JS can't delete it directly
     setUser(null);
     setItems([]);
   };
 
+  // avoids briefly flashing the login page before we actually know if the user is logged in
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
@@ -84,6 +87,7 @@ function App() {
 
   return (
     <Routes>
+      {/* logged-in users get bounced away from auth pages instead of seeing the form again */}
       <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLoginSuccess={setUser} />} />
       <Route
@@ -142,61 +146,62 @@ function App() {
 
             <div className="grid gap-4">
               {items.length === 0 ? (
+                // empty state — shown instead of the map() below when there's nothing to display
                 <div className="text-center py-16 text-gray-500">
                   <p className="text-lg">
                     {filter === 'all'
                       ? "Your watchlist is empty — add your first movie or book above!"
                       : `No items in "${filter.replaceAll('-', ' ')}" yet.`}
                   </p>
-                   </div>
-                  ) : (
-                     items.map((item) => (
-                    <div key={item._id} className="bg-gray-800 p-4 rounded-lg shadow relative flex gap-4">
-                      {item.poster && (
-                        <img src={item.poster} alt={item.title} className="w-20 h-28 object-cover rounded" />
+                </div>
+              ) : (
+                items.map((item) => (
+                  <div key={item._id} className="bg-gray-800 p-4 rounded-lg shadow relative flex gap-4">
+                    {item.poster && (
+                      <img src={item.poster} alt={item.title} className="w-20 h-28 object-cover rounded" />
+                    )}
+                    <div className="flex-1">
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
+                        title="Delete"
+                      >
+                        ✕
+                      </button>
+                      <h2 className="text-xl font-semibold pr-6">{item.title}</h2>
+                      <p className="text-sm text-gray-400 capitalize">
+                        {item.type} — {item.status} {item.year && `(${item.year})`}
+                      </p>
+                      {item.plot && (
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.plot}</p>
                       )}
-                      <div className="flex-1">
+                      {item.status === 'want-to-watch' && (
                         <button
-                          onClick={() => handleDelete(item._id)}
-                          className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
-                          title="Delete"
+                          onClick={() => handleMarkWatched(item._id)}
+                          className="mt-2 text-sm bg-green-600 hover:bg-green-700 px-3 py-1 rounded transition"
                         >
-                          ✕
+                          Mark as Watched
                         </button>
-                        <h2 className="text-xl font-semibold pr-6">{item.title}</h2>
-                        <p className="text-sm text-gray-400 capitalize">
-                          {item.type} — {item.status} {item.year && `(${item.year})`}
-                        </p>
-                        {item.plot && (
-                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.plot}</p>
-                        )}
-                        {item.status === 'want-to-watch' && (
-                          <button
-                            onClick={() => handleMarkWatched(item._id)}
-                            className="mt-2 text-sm bg-green-600 hover:bg-green-700 px-3 py-1 rounded transition"
-                          >
-                            Mark as Watched
-                          </button>
-                        )}
-                        {item.status === 'watched' && (
-                          <div className="mt-2 flex gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                onClick={() => handleRate(item._id, star)}
-                                className={`text-2xl ${item.rating >= star ? 'text-yellow-400' : 'text-gray-600'
-                                  }`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      )}
+                      {item.status === 'watched' && (
+                        <div className="mt-2 flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => handleRate(item._id, star)}
+                              className={`text-2xl ${item.rating >= star ? 'text-yellow-400' : 'text-gray-600'
+                                }`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))
-                )}
-              </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         ) : (
           <Navigate to="/login" />

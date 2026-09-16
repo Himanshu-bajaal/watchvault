@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema(
     {
-        user:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:"User",
-            required:true,
+        user: {
+            type: mongoose.Schema.Types.ObjectId, // stores the _id of the User who owns this item
+            ref: "User", // enables .populate() to fetch full user details later if ever needed
+            required: true,
         },
         title: {
             type: String,
@@ -14,39 +14,39 @@ const itemSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["movie" , "book"],
+            enum: ["movie", "book"],
             required: true,
         },
-        status:{
+        status: {
             type: String,
-            enum: ["want-to-watch" , "watched"],
+            enum: ["want-to-watch", "watched"],
             default: "want-to-watch",
         },
         rating: {
             type: Number,
             min: 1,
             max: 5,
-            default:null,
+            default: null,
         },
         review: {
             type: String,
             default: '',
         },
-        poster:{
-                type: String,
-                default: '',
-        },
-        year:{
+        poster: { // OMDb poster URL — only populated for movies where a match was found
             type: String,
             default: '',
         },
-        plot:{
+        year: {
             type: String,
             default: '',
         },
-            },
-        
-    { timestamps: true,}
+        plot: {
+            type: String,
+            default: '',
+        },
+    },
+
+    { timestamps: true },
 );
 
 const Item = mongoose.model('Item', itemSchema);

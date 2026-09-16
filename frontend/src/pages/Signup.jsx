@@ -15,7 +15,7 @@ function Signup() {
 
     try {
       await api.post('/auth/signup', { name, email, password });
-      navigate('/login');
+      navigate('/login'); // no auto-login after signup — user logs in separately on the next screen
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
     }

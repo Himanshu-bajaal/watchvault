@@ -18,11 +18,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: 6,
-      select: false,
+      select: false, // hides password from query results by default — must opt in with .select('+password')
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // auto-adds and manages createdAt / updatedAt
   }
 );
 

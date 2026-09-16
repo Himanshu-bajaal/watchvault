@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 
-function Login({ onLoginSuccess }) {
+function Login({ onLoginSuccess }) { // onLoginSuccess is passed down from App — updates App's own user state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // lets us redirect programmatically after a successful login
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,9 +14,10 @@ function Login({ onLoginSuccess }) {
 
     try {
       const res = await api.post('/auth/login', { email, password });
-      onLoginSuccess(res.data.user);
+      onLoginSuccess(res.data.user); // tells App "someone's logged in" — App re-renders and shows the watchlist
       navigate('/');
     } catch (err) {
+      // optional chaining (?.) avoids a crash if err.response doesn't exist (e.g. network failure, not a bad response)
       setError(err.response?.data?.message || 'Something went wrong');
     }
   };
@@ -55,6 +56,7 @@ function Login({ onLoginSuccess }) {
 
         <p className="text-gray-400 text-sm text-center">
           Don't have an account?{' '}
+          {/* Link, not <a> — swaps the route without a full page reload */}
           <Link to="/signup" className="text-blue-400 hover:underline">Sign up</Link>
         </p>
       </form>
