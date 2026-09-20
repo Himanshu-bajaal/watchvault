@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+/* ─── Glassmorphism theme — ocean palette ───────────────────────── */
+@theme {
+  --color-gray-900: transparent;
+  --color-gray-800: rgba(255, 255, 255, 0.07);
+  --color-gray-700: rgba(255, 255, 255, 0.10);
+  --color-gray-600: rgba(255, 255, 255, 0.16);
+  --color-gray-500: rgba(255, 255, 255, 0.55);
+  --color-gray-400: rgba(255, 255, 255, 0.75);
+
+  --color-blue-600: #22D3EE;  /* cyan accent */
+  --color-blue-700: #67E8F9;
+
+  --color-yellow-400: #FDE047; /* star fill */
+
+  --color-green-600: #2DD4BF; /* teal, close family to the accent */
+  --color-green-700: #5EEAD4;
+
+  --color-red-500: #FB7185;
+  --color-red-600: #FB7185;
+
+  --color-red-800: rgba(251, 113, 133, 0.3);
+  --color-red-900: rgba(251, 113, 133, 0.1);
+  --color-red-400: #FDA4AF;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0F172A 0%, #0E7490 50%, #164E63 100%);
+  background-attachment: fixed;
+}
+
+.rounded-lg {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+input, select {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
